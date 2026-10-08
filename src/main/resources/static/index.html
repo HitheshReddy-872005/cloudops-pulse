@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudOps Pulse</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 40px 20px; display: flex; justify-content: center; }
+        .card { background: #1e293b; padding: 30px; border-radius: 12px; max-width: 550px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.3); border: 1px solid #334155; }
+        h1 { margin-top: 0; font-size: 1.5rem; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+        .input-group { display: flex; gap: 8px; margin: 20px 0; }
+        input { flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; outline: none; }
+        button { background: #0284c7; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        button:hover { background: #0369a1; }
+        .result-box { display: none; margin-top: 20px; padding: 16px; border-radius: 8px; background: #0f172a; border: 1px solid #334155; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; }
+        .UP { background: #166534; color: #4ade80; }
+        .DOWN { background: #991b1b; color: #f87171; }
+        .DEGRADED { background: #854d0e; color: #facc15; }
+        .metric-row { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>CloudOps Pulse</h1>
+        <p style="color: #94a3b8; font-size: 0.9rem;">Cloud-Native Endpoint Latency & Health Engine</p>
+        <div class="input-group">
+            <input type="text" id="targetUrl" placeholder="google.com or https://example.com" value="google.com">
+            <button onclick="runCheck()">Ping</button>
+        </div>
+        <div id="result" class="result-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="resTarget" style="font-weight: 600; word-break: break-all;"></span>
+                <span id="resBadge" class="badge"></span>
+            </div>
+            <div class="metric-row">
+                <span>HTTP Status Code:</span>
+                <strong id="resStatus"></strong>
+            </div>
+            <div class="metric-row">
+                <span>Round-Trip Latency:</span>
+                <strong id="resLatency"></strong>
+            </div>
+        </div>
+    </div>
+    <script>
+        async function runCheck() {
+            const url = document.getElementById('targetUrl').value.trim();
+            if(!url) return;
+            const resBox = document.getElementById('result');
+            resBox.style.display = 'block';
+            resBox.innerHTML = '<span style="color: #94a3b8;">Inspecting endpoint...</span>';
+            try {
+                const res = await fetch(`/api/check?url=${encodeURIComponent(url)}`);
+                const data = await res.json();
+                resBox.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600; word-break: break-all;">${data.target}</span>
+                        <span class="badge ${data.status}">${data.status}</span>
+                    </div>
+                    <div class="metric-row"><span>Status Code:</span><strong>${data.statusCode}</strong></div>
+                    <div class="metric-row"><span>Latency:</span><strong>${data.latencyMs} ms</strong></div>
+                `;
+            } catch (err) {
+                resBox.innerHTML = `<span style="color: #f87171;">Failed to execute check: ${err.message}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
