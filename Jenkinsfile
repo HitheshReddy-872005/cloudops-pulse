@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'YOUR_DOCKERHUB_USERNAME/cloudops-pulse'
+        DOCKER_HUB_REPO = 'hitheshreddy/cloudops-pulse'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
     }
